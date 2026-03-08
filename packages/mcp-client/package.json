@@ -1,0 +1,63 @@
+{
+  "name": "@openpump/mcp",
+  "version": "1.0.0",
+  "private": false,
+  "description": "OpenPump MCP server for Solana token operations on pump.fun - works with Claude Desktop, Cursor, and any MCP client",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/openpumpio/openpump.git",
+    "directory": "packages/mcp-client"
+  },
+  "homepage": "https://openpump.io/docs/mcp",
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "solana",
+    "pump-fun",
+    "ai",
+    "claude",
+    "cursor"
+  ],
+  "bin": {
+    "openpump-mcp": "./dist/index.js",
+    "@openpump/mcp": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./http": "./dist/server-http.js"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsx watch --env-file=../../.env src/index.ts",
+    "start": "node dist/index.js",
+    "start:http": "node dist/server-http.js",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@clack/prompts": "^1.1.0",
+    "@modelcontextprotocol/sdk": "1.27.1",
+    "express": "^4.18.0",
+    "picocolors": "^1.1.1",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@openpump/typescript-config": "workspace:*",
+    "@types/express": "^4.17.21",
+    "tsup": "^8.0.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.2.0"
+  }
+}

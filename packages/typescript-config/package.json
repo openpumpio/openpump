@@ -1,0 +1,13 @@
+{
+  "name": "@openpump/typescript-config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "ISC",
+  "exports": {
+    "./base": "./base.json",
+    "./bundler": "./bundler.json",
+    "./node": "./node.json",
+    "./vite": "./vite.json"
+  }
+}

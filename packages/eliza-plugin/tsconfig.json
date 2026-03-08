@@ -1,0 +1,13 @@
+{
+  "extends": "@openpump/typescript-config/node",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "exactOptionalPropertyTypes": false,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "types": ["node"]
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}

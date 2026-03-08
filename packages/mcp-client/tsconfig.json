@@ -1,0 +1,10 @@
+{
+  "extends": "@openpump/typescript-config/node",
+  "compilerOptions": {
+    "outDir": "dist",
+    "noEmit": false,
+    "exactOptionalPropertyTypes": false
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}
