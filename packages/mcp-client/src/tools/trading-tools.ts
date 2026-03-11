@@ -61,6 +61,38 @@ function agentError(code: string, message: string, suggestion?: string) {
 }
 
 /**
+ * Validate that an imageUrl is safe to fetch:
+ * - Must be https: scheme only
+ * - Must not point to a private/internal IP or hostname
+ * Throws a descriptive Error if any check fails.
+ */
+function validateImageUrl(url: string): void {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    throw new Error(`Invalid imageUrl: not a valid URL`);
+  }
+  if (parsed.protocol !== 'https:') {
+    throw new Error(`Invalid imageUrl: must use https`);
+  }
+  const host = parsed.hostname.toLowerCase();
+  const blocked = [
+    /^localhost$/,
+    /^127\./,
+    /^0\.0\.0\.0$/,
+    /^::1$/,
+    /^10\./,
+    /^192\.168\./,
+    /^172\.(1[6-9]|2\d|3[01])\./,
+    /^169\.254\./,
+  ];
+  if (blocked.some((re) => re.test(host))) {
+    throw new Error(`Invalid imageUrl: private or internal addresses are not allowed`);
+  }
+}
+
+/**
  * Fetch the current wallet balance (SOL + tokens) after a trade.
  *
  * Uses POST /wallets/:id/refresh-balance which bypasses the 30s Redis cache and
@@ -104,6 +136,184 @@ const LAMPORTS_PER_SOL = 1_000_000_000;
  * estimate-bundle-cost returns synchronous cost estimates.
  */
 export function registerTradingTools(server: McpServer, userContext: UserContext, apiBaseUrl: string): void {
+  // -- bundle-launch --------------------------------------------------------
+
+  server.tool(
+    'bundle-launch',
+    [
+      RICO_WARNING,
+      'Atomically create a new PumpFun token and execute coordinated buys from multiple wallets using Jito MEV bundles.',
+      'Buyer instructions are greedily packed: as many wallet buy instructions as fit in 1232 bytes are combined into a single transaction.',
+      'Bundle 1 (token creation + packed buyer txs) is atomic and same-block guaranteed.',
+      'Additional buyers overflow into subsequent bundles and are NOT guaranteed same-block execution.',
+      'Requires confirm: true to execute.',
+      'Always run estimate-bundle-cost before this tool to verify sufficient SOL balance.',
+      'Returns jobId for async tracking — use poll-job to track status.',
+    ].join(' '),
+    {
+      devWalletId: z.string().describe('ID of the dev/creator wallet'),
+      buyWalletIds: z
+        .array(z.string())
+        .max(20)
+        .describe('IDs of wallets to participate in the bundle buy (max 20)'),
+      tokenParams: z.object({
+        name: z.string().max(32).describe('Token name (max 32 chars)'),
+        symbol: z.string().max(10).describe('Token ticker symbol (max 10 chars)'),
+        description: z.string().max(500).describe('Token description (max 500 chars)'),
+        imageUrl: z.string().url().describe('Token image URL'),
+      }),
+      devBuyAmountSol: z
+        .string()
+        .regex(/^\d+(\.\d{1,9})?$/, 'Must be a SOL decimal string')
+        .describe('Dev wallet initial buy in SOL (e.g. "0.1" = 0.1 SOL). Use "0" for no dev buy.'),
+      walletBuyAmounts: z
+        .array(z.string().regex(/^\d+(\.\d{1,9})?$/, 'Must be a SOL decimal string'))
+        .describe('SOL amount per wallet (e.g. ["0.05", "0.1"]), same order as buyWalletIds'),
+      slippageBps: z
+        .number()
+        .int()
+        .min(0)
+        .max(10_000)
+        .optional()
+        .describe(
+          'Slippage tolerance in basis points (default: 2500 = 25%). ' +
+          'IMPORTANT: bundle-launch packs multiple buyer wallets into the same TX — each subsequent buyer within a TX ' +
+          'sees a shifted bonding curve, so standard 5% slippage WILL cause errors. ' +
+          'Recommended: 2500 (25%) for up to 4 wallets per TX, 5000 (50%) for larger groups.',
+        ),
+      priorityLevel: PRIORITY_LEVEL_SCHEMA,
+      confirm: z
+        .boolean()
+        .describe(
+          'REQUIRED: Must be true to execute. Run estimate-bundle-cost first to see total SOL required.',
+        ),
+    },
+    async ({ devWalletId, buyWalletIds, tokenParams, devBuyAmountSol, walletBuyAmounts, slippageBps, priorityLevel, confirm }) => {
+      // Two-step protection: confirm must be explicitly true
+      if (!confirm) {
+        return agentError(
+          'CONFIRMATION_REQUIRED',
+          'bundle-launch requires explicit confirmation (confirm: true) before execution.',
+          'First run estimate-bundle-cost to see total SOL required. Then call bundle-launch again with confirm: true.',
+        );
+      }
+
+      // Validate dev wallet belongs to this user
+      const devWallet = userContext.wallets.find((w) => w.id === devWalletId);
+      if (!devWallet) {
+        return agentError(
+          'WALLET_NOT_FOUND',
+          `Dev wallet "${devWalletId}" not found for this account.`,
+          'Use list-wallets to see available wallet IDs.',
+        );
+      }
+
+      // Validate all buy wallet IDs belong to this user
+      const missingWallets = buyWalletIds.filter(
+        (id) => !userContext.wallets.some((w) => w.id === id),
+      );
+      if (missingWallets.length > 0) {
+        return agentError(
+          'WALLET_NOT_FOUND',
+          `Buy wallets not found: ${missingWallets.join(', ')}.`,
+          'Use list-wallets to see available wallet IDs.',
+        );
+      }
+
+      // Validate walletBuyAmounts length matches buyWalletIds
+      if (walletBuyAmounts.length !== buyWalletIds.length) {
+        return agentError(
+          'INVALID_INPUT',
+          `walletBuyAmounts length (${walletBuyAmounts.length.toString()}) must match buyWalletIds length (${buyWalletIds.length.toString()}).`,
+          'Provide one SOL amount per wallet in buyWalletIds, in the same order.',
+        );
+      }
+
+      try {
+        const api = createApiClient(userContext.apiKey, apiBaseUrl);
+
+        // Validate imageUrl before fetching (SSRF guard)
+        try {
+          validateImageUrl(tokenParams.imageUrl);
+        } catch (validationError) {
+          return agentError(
+            'INVALID_IMAGE_URL',
+            validationError instanceof Error ? validationError.message : String(validationError),
+            'Provide a publicly accessible https:// image URL that does not point to a private or internal address.',
+          );
+        }
+
+        // Fetch image from URL and convert to base64
+        const imageRes = await fetch(tokenParams.imageUrl, { signal: AbortSignal.timeout(10_000) });
+        if (!imageRes.ok) {
+          return agentError(
+            'IMAGE_FETCH_FAILED',
+            `Failed to fetch token image from ${tokenParams.imageUrl}: HTTP ${imageRes.status.toString()}`,
+            'Provide a publicly accessible image URL.',
+          );
+        }
+        const imageBuffer = await imageRes.arrayBuffer();
+        const imageBase64 = Buffer.from(imageBuffer).toString('base64');
+        const contentType = imageRes.headers.get('content-type') ?? 'image/png';
+        // Map MIME type to accepted values; default to image/png
+        const ACCEPTED_MIME_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'] as const;
+        type AcceptedMime = (typeof ACCEPTED_MIME_TYPES)[number];
+        const imageType: AcceptedMime = (
+          ACCEPTED_MIME_TYPES.find((m) => contentType.includes(m.split('/')[1] ?? '')) ?? 'image/png'
+        );
+
+        // Fetch Jito tip for the chosen priority level to pass as tipLamports
+        const approxTipLamports = APPROX_TIP_LAMPORTS[priorityLevel] ?? APPROX_TIP_LAMPORTS['normal'] ?? 50_000;
+
+        const requestBody: Record<string, unknown> = {
+          devWalletId,
+          buyWalletIds,
+          name: tokenParams.name,
+          symbol: tokenParams.symbol,
+          description: tokenParams.description,
+          imageBase64,
+          imageType,
+          devBuyAmountSol,
+          walletBuyAmounts,
+          tipLamports: approxTipLamports,
+          ...(slippageBps !== undefined && { slippageBps }),
+        };
+
+        const res = await api.post('/api/tokens/bundle-launch', requestBody);
+
+        if (!res.ok) {
+          const errBody = await res.text();
+          return agentError(
+            'BUNDLE_LAUNCH_FAILED',
+            `Bundle launch failed (HTTP ${res.status.toString()}): ${errBody}`,
+            'Check wallet balances and try again.',
+          );
+        }
+
+        const data = (await res.json()) as { jobId?: string };
+
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify({
+                jobId: data.jobId,
+                message: 'Bundle launch submitted. Use poll-job to track progress.',
+                note: RICO_WARNING,
+              }),
+            },
+          ],
+        };
+      } catch (error) {
+        return agentError(
+          'API_ERROR',
+          `Bundle launch request failed: ${error instanceof Error ? error.message : String(error)}`,
+          'Try again in a few seconds.',
+        );
+      }
+    },
+  );
+
   // -- bundle-buy -----------------------------------------------------------
 
   server.tool(

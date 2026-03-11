@@ -174,6 +174,36 @@ The HTTP transport exposes `POST /mcp`, `GET /mcp`, and `DELETE /mcp` endpoints 
 ### Jobs
 - `poll-job` -- Poll the status of an async job (token creation, trades)
 
+## Devnet
+
+To test against Solana devnet (no real funds), point the MCP server at the devnet instance:
+
+```bash
+OPENPUMP_API_KEY=op_sk_live_... OPENPUMP_API_URL=https://devnet.openpump.io npx @openpump/mcp
+```
+
+Or configure your client to use the devnet HTTP endpoint directly:
+
+**Claude Desktop / Cursor:**
+```json
+{
+  "mcpServers": {
+    "openpump-devnet": {
+      "url": "https://devnet.openpump.io/api/mcp",
+      "headers": { "Authorization": "Bearer op_sk_live_..." }
+    }
+  }
+}
+```
+
+**Claude Code:**
+```bash
+claude mcp add --transport http openpump-devnet https://devnet.openpump.io/api/mcp \
+  --header "Authorization: Bearer op_sk_live_..."
+```
+
+> Devnet API keys are created at [devnet.openpump.io](https://devnet.openpump.io) and are separate from mainnet keys.
+
 ## Development
 
 ```bash

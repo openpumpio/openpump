@@ -8,7 +8,9 @@
 
 export interface ApiClient {
   get(path: string): Promise<Response>;
-  post(path: string, body: unknown): Promise<Response>;
+  post(path: string, body: unknown, extraHeaders?: Record<string, string>): Promise<Response>;
+  patch(path: string, body: unknown): Promise<Response>;
+  delete(path: string): Promise<Response>;
 }
 
 /**
@@ -27,14 +29,33 @@ export function createApiClient(apiKey: string, baseUrl: string): ApiClient {
       });
     },
 
-    async post(path: string, body: unknown): Promise<Response> {
+    async post(path: string, body: unknown, extraHeaders?: Record<string, string>): Promise<Response> {
       return fetch(baseUrl + path, {
         method: 'POST',
         headers: {
           Authorization: authHeader,
           'Content-Type': 'application/json',
+          ...extraHeaders,
         },
         body: JSON.stringify(body),
+      });
+    },
+
+    async patch(path: string, body: unknown): Promise<Response> {
+      return fetch(baseUrl + path, {
+        method: 'PATCH',
+        headers: {
+          Authorization: authHeader,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+    },
+
+    async delete(path: string): Promise<Response> {
+      return fetch(baseUrl + path, {
+        method: 'DELETE',
+        headers: { Authorization: authHeader },
       });
     },
   };

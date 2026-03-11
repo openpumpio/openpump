@@ -30,6 +30,19 @@ const op = new OpenPump({
 });
 ```
 
+### Devnet
+
+To test against Solana devnet (no real funds), point the SDK at the devnet API:
+
+```ts
+const op = new OpenPump({
+  apiKey: 'op_sk_live_...',              // Devnet key from devnet.openpump.io
+  baseUrl: 'https://devnet.openpump.io', // Devnet API
+});
+```
+
+> Devnet API keys are created at [devnet.openpump.io](https://devnet.openpump.io) and are separate from mainnet keys.
+
 ## Resources
 
 ### Wallets

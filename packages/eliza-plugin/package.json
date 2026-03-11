@@ -1,6 +1,6 @@
 {
   "name": "@openpump/eliza-plugin",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "description": "ElizaOS plugin for OpenPump — buy, sell, and launch PumpFun tokens via conversational AI agents",
   "type": "module",

@@ -39,6 +39,25 @@ That's it. Your agent now has access to 8 trading actions and a portfolio contex
 
 Settings are read from `runtime.getSetting()`, which resolves from your character JSON's `settings.secrets` object.
 
+### Devnet
+
+To test against Solana devnet (no real funds), set `OPENPUMP_API_URL` to the devnet instance:
+
+```json
+{
+  "name": "TradingAgent",
+  "plugins": ["@openpump/eliza-plugin"],
+  "settings": {
+    "secrets": {
+      "OPENPUMP_API_KEY": "op_sk_live_...",
+      "OPENPUMP_API_URL": "https://devnet.openpump.io"
+    }
+  }
+}
+```
+
+> Devnet API keys are created at [devnet.openpump.io](https://devnet.openpump.io) and are separate from mainnet keys.
+
 ## Actions
 
 The plugin registers 8 actions that the agent can invoke based on natural language:
