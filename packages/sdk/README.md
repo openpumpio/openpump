@@ -5,8 +5,7 @@ TypeScript SDK for the OpenPump REST API. Zero runtime dependencies (uses global
 ## Installation
 
 ```bash
-# Internal workspace usage
-pnpm add @openpump/sdk
+npm install @openpump/sdk
 ```
 
 ## Quick Start
