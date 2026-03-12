@@ -1,11 +1,11 @@
 /**
- * Barrel file that registers all 56 MCP tools onto a server instance.
+ * Barrel file that registers all 57 MCP tools onto a server instance.
  *
  * Tool groups:
  * - token-tools:    create-token
  * - trading-tools:  bundle-launch, bundle-buy, bundle-sell, buy-token, sell-token, estimate-bundle-cost, claim-creator-fees
  * - transfer-tools: transfer-sol, transfer-token
- * - wallet-tools:   create-wallet, get-aggregate-balance, get-wallet-deposit-address, get-wallet-transactions
+ * - wallet-tools:   create-wallet, batch-create-wallets, get-aggregate-balance, get-wallet-deposit-address, get-wallet-transactions
  * - info-tools:     get-token-info, get-token-market-info, list-my-tokens, get-token-holdings,
  *                   get-wallet-balance, list-wallets, get-creator-fees,
  *                   get-token-quote, get-jito-tip-levels
@@ -19,7 +19,7 @@
  *                   stop-loss-list, stop-loss-status
  * - spam-tools:     spam-launch, estimate-spam-cost, cancel-spam-launch
  *
- * Total: 56 tools.
+ * Total: 57 tools.
  *
  * Unlike apps/mcp, this publishable version passes apiBaseUrl explicitly
  * to each tool registration function (no hardcoded API_BASE_URL constant).

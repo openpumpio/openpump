@@ -124,7 +124,7 @@ Max open positions:  10       (was 5)
 ```
 workspace-template/
   SOUL.md           -- Agent personality, core behaviors, risk parameters
-  TOOLS.md          -- Complete tool reference (56 tools, all parameters)
+  TOOLS.md          -- Complete tool reference (57 tools, all parameters)
   SKILLS.md         -- ClawHub skill references (openpump-solana-mcp)
   HEARTBEAT.md      -- 30-minute autonomous check cycle procedure
   openclaw.json     -- MCP server configuration

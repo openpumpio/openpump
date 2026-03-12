@@ -84,7 +84,7 @@ Add the following to your `~/.openclaw/openclaw.json` under the `mcpServers` key
 }
 ```
 
-OpenClaw will hot-reload and connect to the server. All 56 tools become available immediately.
+OpenClaw will hot-reload and connect to the server. All 57 tools become available immediately.
 
 ### Alternative: HTTP Transport (No Local Process)
 
@@ -126,7 +126,7 @@ If you prefer a remote connection instead of a local stdio process:
 - **DeFi beyond pump.fun** -- Raydium, Orca, Jupiter swaps are not supported
 - **NFT operations** -- fungible tokens only
 
-## Available Tools (56)
+## Available Tools (57)
 
 ### Token Creation & Trading (9)
 
@@ -148,11 +148,12 @@ If you prefer a remote connection instead of a local stdio process:
 | `transfer-sol` | Send SOL to any Solana address (10 SOL cap per call) |
 | `transfer-token` | Send SPL tokens to any Solana address |
 
-### Wallet Management (4)
+### Wallet Management (5)
 
 | Tool | Description |
 |------|-------------|
 | `create-wallet` | Create a new HD-derived custodial wallet |
+| `batch-create-wallets` | Create 2-50 wallets in one action with auto-numbered labels |
 | `get-aggregate-balance` | Sum SOL across all user wallets |
 | `get-wallet-deposit-address` | Get deposit address and QR-ready funding instructions |
 | `get-wallet-transactions` | Paginated transfer history for a wallet |

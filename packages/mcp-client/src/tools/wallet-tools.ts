@@ -2,6 +2,7 @@
  * Wallet management tools for the OpenPump MCP server.
  *
  * - create-wallet:              Create a new HD-derived custodial wallet
+ * - batch-create-wallets:       Create multiple wallets in a single action (2-50)
  * - get-aggregate-balance:      Sum SOL across all user wallets
  * - get-wallet-deposit-address: Get deposit address and funding instructions for a wallet
  * - get-wallet-transactions:    Paginated transfer history for a wallet
@@ -75,6 +76,83 @@ export function registerWalletTools(server: McpServer, userContext: UserContext,
         return agentError(
           'API_ERROR',
           `Create wallet request failed: ${error instanceof Error ? error.message : String(error)}`,
+          'Try again in a few seconds.',
+        );
+      }
+    },
+  );
+
+  // -- batch-create-wallets -------------------------------------------------
+
+  server.tool(
+    'batch-create-wallets',
+    [
+      'Create multiple HD-derived custodial wallets in a single action (2-50).',
+      'Labels are auto-numbered: "{labelPrefix}-1", "{labelPrefix}-2", etc.',
+      'If no labelPrefix is provided, wallets are numbered "wallet-1", "wallet-2", etc.',
+      'Returns the list of created wallets with IDs and public keys, plus success/failure counts.',
+      'Credit cost: 2,000 credits per wallet.',
+      DISCLAIMER,
+    ].join(' '),
+    {
+      count: z
+        .number()
+        .int()
+        .min(2)
+        .max(50)
+        .describe('Number of wallets to create (2-50).'),
+      labelPrefix: z
+        .string()
+        .max(90)
+        .optional()
+        .describe(
+          'Optional label prefix. Wallets are named "{prefix}-1", "{prefix}-2", etc. Defaults to "wallet" if omitted.',
+        ),
+    },
+    async ({ count, labelPrefix }) => {
+      try {
+        const api = createApiClient(userContext.apiKey, apiBaseUrl);
+        const body: Record<string, unknown> = { count };
+        if (labelPrefix !== undefined) body['labelPrefix'] = labelPrefix;
+
+        const res = await api.post('/api/wallets/batch', body);
+
+        if (!res.ok) {
+          const text = await res.text();
+          return agentError(
+            'BATCH_CREATE_FAILED',
+            `Failed to batch create wallets (HTTP ${res.status.toString()}): ${text}`,
+            'Check your credit balance and try again.',
+          );
+        }
+
+        const data = (await res.json()) as {
+          data?: {
+            wallets?: Array<{ id?: string; publicKey?: string; walletIndex?: number; label?: string | null }>;
+            successCount?: number;
+            failedCount?: number;
+          };
+        };
+
+        // Sync newly created wallets into the in-session wallet list
+        if (data?.data?.wallets) {
+          for (const w of data.data.wallets) {
+            if (w.id && w.publicKey !== undefined) {
+              userContext.wallets.push({
+                id: w.id,
+                publicKey: w.publicKey,
+                label: w.label ?? null,
+                index: w.walletIndex ?? userContext.wallets.length,
+              });
+            }
+          }
+        }
+
+        return { content: [{ type: 'text' as const, text: JSON.stringify(data) }] };
+      } catch (error) {
+        return agentError(
+          'API_ERROR',
+          `Batch create wallets request failed: ${error instanceof Error ? error.message : String(error)}`,
           'Try again in a few seconds.',
         );
       }

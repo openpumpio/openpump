@@ -6,7 +6,7 @@ This workspace uses the following ClawHub skills for its MCP tool capabilities.
 
 **Source:** `clawhub://openpump-solana-mcp`
 
-Solana token launch and trading tools via the OpenPump MCP server. Provides 56 tools covering:
+Solana token launch and trading tools via the OpenPump MCP server. Provides 57 tools covering:
 
 - Token creation on pump.fun
 - Buying and selling tokens (single wallet and multi-wallet bundles)
@@ -53,7 +53,7 @@ Or add it to your `~/.openclaw/.env` file so it persists across sessions.
 |----------|-------|-------------|
 | Token Creation & Trading | 9 | `create-token`, `bundle-launch`, `bundle-buy`, `bundle-sell`, `buy-token`, `sell-token`, `estimate-bundle-cost`, `claim-creator-fees` |
 | Transfers | 2 | `transfer-sol`, `transfer-token` |
-| Wallet Management | 4 | `create-wallet`, `get-aggregate-balance`, `get-wallet-deposit-address`, `get-wallet-transactions` |
+| Wallet Management | 5 | `create-wallet`, `batch-create-wallets`, `get-aggregate-balance`, `get-wallet-deposit-address`, `get-wallet-transactions` |
 | Information | 9 | `get-token-info`, `get-token-market-info`, `list-my-tokens`, `get-token-holdings`, `get-wallet-balance`, `list-wallets`, `get-creator-fees`, `get-token-quote`, `get-jito-tip-levels` |
 | Vanity Address | 4 | `estimate-vanity-cost`, `order-vanity-address`, `list-vanity-jobs`, `get-vanity-job` |
 | Market Making | 13 | `mm-create-pool`, `mm-fund-pool`, `mm-pool-status`, `mm-consolidate-pool`, `mm-list-pools`, `mm-start-session`, `mm-stop-session`, `mm-pause-session`, `mm-resume-session`, `mm-session-status`, `mm-list-sessions`, `mm-update-strategy`, `mm-get-pnl` |

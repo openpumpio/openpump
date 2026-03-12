@@ -128,6 +128,7 @@ Create `.mcp.json` in your project root:
 | Tool | Description |
 |------|-------------|
 | `create-wallet` | Create a new HD-derived custodial wallet |
+| `batch-create-wallets` | Create 2-50 wallets in one action with auto-numbered labels |
 | `get-aggregate-balance` | Sum SOL across all user wallets |
 | `get-wallet-deposit-address` | Get deposit address and QR-ready funding instructions |
 | `get-wallet-transactions` | Paginated transfer history for a wallet |

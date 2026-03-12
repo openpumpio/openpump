@@ -4,7 +4,7 @@ MCP (Model Context Protocol) server for Solana token operations on [pump.fun](ht
 
 ## Features
 
-- **23 tools** for token creation, trading, transfers, wallet management, and market data
+- **57 tools** for token creation, trading, transfers, wallet management, and market data
 - **Dual transport**: stdio (for `npx` / Claude Desktop) and HTTP (for remote deployment)
 - **API key authentication** via the OpenPump REST API -- no database required
 - **Zero workspace dependencies** -- installable from npm without access to the monorepo
@@ -156,6 +156,7 @@ The HTTP transport exposes `POST /mcp`, `GET /mcp`, and `DELETE /mcp` endpoints 
 
 ### Wallet Management
 - `create-wallet` -- Create a new managed wallet
+- `batch-create-wallets` -- Create 2-50 wallets in one action
 - `list-wallets` -- List all wallets
 - `get-wallet-balance` -- Get SOL balance for a wallet
 - `get-aggregate-balance` -- Get total balance across all wallets

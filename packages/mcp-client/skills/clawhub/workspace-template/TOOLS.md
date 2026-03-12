@@ -1,6 +1,6 @@
 # TOOLS -- OpenPump MCP Server Tool Reference
 
-This workspace connects to the OpenPump MCP server, which provides 56 tools for Solana token operations on pump.fun. All tools communicate with the OpenPump REST API using your `OPENPUMP_API_KEY`.
+This workspace connects to the OpenPump MCP server, which provides 57 tools for Solana token operations on pump.fun. All tools communicate with the OpenPump REST API using your `OPENPUMP_API_KEY`.
 
 ## MCP Server Connection
 
@@ -197,6 +197,19 @@ Create a new HD-derived custodial wallet.
 | label | string | No | Human-readable label (e.g., `"trading-main"`) |
 
 **When to use:** Setting up a new trading wallet. Use labels to organize by purpose.
+
+### `batch-create-wallets`
+
+Create 2-50 HD-derived wallets in a single action with auto-numbered labels.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| count | number | Yes | Number of wallets to create (2-50) |
+| labelPrefix | string | No | Label prefix — wallets named `"{prefix}-1"`, `"{prefix}-2"`, etc. Defaults to `"wallet"` |
+
+**Credit cost:** 2,000 credits per wallet.
+
+**When to use:** Setting up multiple wallets at once for sniping, distribution, or volume operations.
 
 ### `get-aggregate-balance`
 
