@@ -203,24 +203,31 @@ export function registerInfoTools(server: McpServer, userContext: UserContext, a
 
       const api = createApiClient(userContext.apiKey, apiBaseUrl);
 
-      // Fetch balances for all wallets in parallel
-      const balanceResults = await Promise.allSettled(
-        wallets.map(async (w) => {
-          const res = await api.get(`/api/wallets/${w.id}/balance`);
-          if (!res.ok) throw new Error(`HTTP ${res.status.toString()} for wallet ${w.id}`);
-          const body = (await res.json()) as {
-            data: {
-              tokenBalances: Array<{
-                mint: string;
-                amount: string;
-                uiAmount: number | null;
-                decimals: number;
-              }>;
+      // Fetch balances with a concurrency limit of 5 to avoid RPC rate limiting.
+      const CONCURRENCY = 5;
+      const balanceResults: PromiseSettledResult<{ wallet: typeof wallets[number]; tokenBalances: Array<{ mint: string; amount: string; uiAmount: number | null; decimals: number }> }>[] = [];
+
+      for (let i = 0; i < wallets.length; i += CONCURRENCY) {
+        const batch = wallets.slice(i, i + CONCURRENCY);
+        const batchResults = await Promise.allSettled(
+          batch.map(async (w) => {
+            const res = await api.get(`/api/wallets/${w.id}/balance`);
+            if (!res.ok) throw new Error(`HTTP ${res.status.toString()} for wallet ${w.id}`);
+            const body = (await res.json()) as {
+              data: {
+                tokenBalances: Array<{
+                  mint: string;
+                  amount: string;
+                  uiAmount: number | null;
+                  decimals: number;
+                }>;
+              };
             };
-          };
-          return { wallet: w, tokenBalances: body.data.tokenBalances };
-        }),
-      );
+            return { wallet: w, tokenBalances: body.data.tokenBalances };
+          }),
+        );
+        balanceResults.push(...batchResults);
+      }
 
       // -- Filter mode: specific mint ----------------------------------------
       if (mint !== undefined) {

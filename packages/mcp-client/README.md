@@ -137,43 +137,114 @@ The HTTP transport exposes `POST /mcp`, `GET /mcp`, and `DELETE /mcp` endpoints 
 | `PORT` | No | `3001` | HTTP transport port |
 | `MCP_SESSION_TTL_HOURS` | No | `4` | HTTP session idle timeout (hours) |
 
-## Available Tools
+## Available Tools (57)
 
-### Token Operations
-- `create-token` -- Create a new token on pump.fun
+### Token Creation & Trading (8)
 
-### Trading
-- `buy-token` -- Buy tokens
-- `sell-token` -- Sell tokens
-- `bundle-buy` -- Bundle buy across multiple wallets
-- `bundle-sell` -- Bundle sell across multiple wallets
-- `estimate-bundle-cost` -- Estimate cost for a bundle operation
-- `claim-creator-fees` -- Claim accumulated creator fees
+| Tool | Description |
+|------|-------------|
+| `create-token` | Create a new token on pump.fun |
+| `bundle-launch` | Create token + coordinated multi-wallet buy via Jito bundles |
+| `bundle-buy` | Coordinated multi-wallet buy via Jito bundles |
+| `bundle-sell` | Coordinated multi-wallet sell via Jito bundles |
+| `buy-token` | Buy a token with SOL (single wallet) |
+| `sell-token` | Sell a token back to SOL |
+| `estimate-bundle-cost` | Preview bundle costs without executing |
+| `claim-creator-fees` | Claim accumulated PumpFun creator fees |
 
-### Transfers
-- `transfer-sol` -- Transfer SOL between wallets
-- `transfer-token` -- Transfer SPL tokens between wallets
+### Transfers (2)
 
-### Wallet Management
-- `create-wallet` -- Create a new managed wallet
-- `batch-create-wallets` -- Create 2-50 wallets in one action
-- `list-wallets` -- List all wallets
-- `get-wallet-balance` -- Get SOL balance for a wallet
-- `get-aggregate-balance` -- Get total balance across all wallets
-- `get-wallet-deposit-address` -- Get deposit address for a wallet
-- `get-wallet-transactions` -- Get transaction history
+| Tool | Description |
+|------|-------------|
+| `transfer-sol` | Send SOL to any Solana address (10 SOL cap per call) |
+| `transfer-token` | Send SPL tokens to any Solana address |
 
-### Market Data
-- `get-token-info` -- Get token metadata and details
-- `get-token-market-info` -- Get live market data (price, volume, holders)
-- `get-token-holdings` -- Get token holdings for a wallet
-- `get-token-quote` -- Get a buy/sell quote
-- `list-my-tokens` -- List tokens created by the authenticated user
-- `get-creator-fees` -- Get claimable creator fees
-- `get-jito-tip-levels` -- Get current Jito tip levels
+### Wallet Management (7)
 
-### Jobs
-- `poll-job` -- Poll the status of an async job (token creation, trades)
+| Tool | Description |
+|------|-------------|
+| `create-wallet` | Create a new HD-derived custodial wallet |
+| `batch-create-wallets` | Create 2-50 wallets in one action with auto-numbered labels |
+| `list-wallets` | List all wallets with public keys, labels, and derivation index |
+| `get-wallet-balance` | Get SOL + token balances for a wallet |
+| `get-aggregate-balance` | Get total SOL across all wallets |
+| `get-wallet-deposit-address` | Get deposit address and funding instructions |
+| `get-wallet-transactions` | Paginated transfer history for a wallet |
+
+### Market Data & Info (7)
+
+| Tool | Description |
+|------|-------------|
+| `get-token-info` | Token metadata: price, market cap, bonding curve progress, graduation status |
+| `get-token-market-info` | Rich analytics: volume, buy/sell counts, price changes, risk metrics |
+| `get-token-holdings` | Which wallets hold a specific token (or all holdings across all wallets) |
+| `get-token-quote` | Price quote for buy or sell without executing |
+| `list-my-tokens` | All tokens launched by the authenticated user |
+| `get-creator-fees` | Check accumulated PumpFun creator fees |
+| `get-jito-tip-levels` | Current Jito MEV tip amounts per priority level |
+
+### Vanity Addresses (4)
+
+| Tool | Description |
+|------|-------------|
+| `estimate-vanity-cost` | Estimate credit cost for a vanity address pattern |
+| `order-vanity-address` | Order a custom vanity Solana wallet or mint address |
+| `list-vanity-jobs` | List all vanity address generation jobs |
+| `get-vanity-job` | Get status of a specific vanity job |
+
+### Market Making (13)
+
+| Tool | Description |
+|------|-------------|
+| `mm-create-pool` | Create a wallet pool for market making (2-50 wallets) |
+| `mm-fund-pool` | Distribute SOL to pool wallets (optional multi-hop obfuscation) |
+| `mm-pool-status` | Aggregate pool view: per-wallet SOL + token balances |
+| `mm-consolidate-pool` | Sweep all funds from pool wallets to a single target |
+| `mm-list-pools` | List all wallet pools |
+| `mm-start-session` | Start autonomous market making on a token |
+| `mm-stop-session` | Stop a running session |
+| `mm-pause-session` | Pause a session (retains position and config) |
+| `mm-resume-session` | Resume a paused session |
+| `mm-session-status` | Session stats: trades, P&L, position |
+| `mm-list-sessions` | List all sessions (filter by status) |
+| `mm-update-strategy` | Hot-update strategy params on a running session |
+| `mm-get-pnl` | Detailed P&L: cost basis, realized/unrealized, ROI |
+
+### Sniping (7)
+
+| Tool | Description |
+|------|-------------|
+| `snipe-start` | Start a snipe monitor that auto-buys new tokens matching criteria |
+| `snipe-stop` | Stop a snipe monitor permanently |
+| `snipe-pause` | Pause a snipe monitor |
+| `snipe-resume` | Resume a paused snipe monitor |
+| `snipe-update` | Update criteria on an active or paused monitor |
+| `snipe-status` | Get monitor status and criteria |
+| `snipe-list` | List all snipe monitors |
+
+### Stop-Loss (4)
+
+| Tool | Description |
+|------|-------------|
+| `stop-loss-set` | Set a stop-loss that auto-sells when market cap drops below trigger |
+| `stop-loss-remove` | Remove a stop-loss monitor |
+| `stop-loss-list` | List all stop-loss monitors |
+| `stop-loss-status` | Get status of a specific stop-loss |
+
+### Spam Launch (3)
+
+| Tool | Description |
+|------|-------------|
+| `spam-launch` | Launch multiple tokens in rapid succession from a single wallet |
+| `estimate-spam-cost` | Estimate SOL + credit cost for a spam campaign |
+| `cancel-spam-launch` | Cancel a running spam launch |
+
+### Jobs (2)
+
+| Tool | Description |
+|------|-------------|
+| `poll-job` | Check status of an async job (token creation, trades, bundles) |
+| `cancel-job` | Cancel a running async orchestration job |
 
 ## Devnet
 
