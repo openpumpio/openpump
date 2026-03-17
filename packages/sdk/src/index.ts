@@ -24,6 +24,12 @@ export type {
   TransferResult,
   TransactionListOptions,
   TransactionListResult,
+  BatchCreateOptions,
+  BatchCreateResult,
+  AggregateBalance,
+  ImportWalletOptions,
+  ExportPrivateKeyOptions,
+  ExportPrivateKeyResult,
 } from './resources/wallets.js';
 export type {
   Tokens,
@@ -42,6 +48,9 @@ export type {
   QuoteResult,
   QuoteBuyCostOptions,
   QuoteBuyCostResult,
+  BundleBuyEntry,
+  BundleBuyOptions,
+  BundleBuyResult,
   BundleSellOptions,
   BundleSellResult,
   BundleSellEntry,
@@ -58,3 +67,39 @@ export type {
   BundleLaunchOptions,
   BundleLaunchResult,
 } from './resources/bundles.js';
+export type {
+  MarketMaking,
+  CreatePoolOptions,
+  PoolInfo,
+  PoolStatus,
+  FundPoolOptions,
+  FundPoolResult,
+  ConsolidatePoolOptions,
+  ConsolidatePoolResult,
+  SessionConfig,
+  StartSessionOptions,
+  SessionInfo,
+  SessionPnl,
+} from './resources/market-making.js';
+export type {
+  Snipe,
+  MonitorCriteria,
+  StartMonitorOptions,
+  MonitorInfo,
+} from './resources/snipe.js';
+export type {
+  StopLoss,
+  SetStopLossOptions,
+  StopLossInfo,
+} from './resources/stop-loss.js';
+export type {
+  Vanity,
+  VanityPatternType,
+  VanityAddressType,
+  VanityEstimateOptions,
+  VanityEstimateResult,
+  VanityOrderOptions,
+  VanityOrderResult,
+  VanityJob,
+  VanityJobListOptions,
+} from './resources/vanity.js';

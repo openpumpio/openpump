@@ -34,12 +34,25 @@ export function getClient(agent: Record<string, unknown>): ApiClient {
  */
 export async function callApi(
   client: ApiClient,
-  method: 'GET' | 'POST',
+  method: 'GET' | 'POST' | 'PATCH' | 'DELETE',
   path: string,
   body?: Record<string, unknown>,
 ): Promise<Record<string, unknown>> {
-  const res =
-    method === 'GET' ? await client.get(path) : await client.post(path, body ?? {});
+  let res: Response;
+  switch (method) {
+    case 'GET':
+      res = await client.get(path);
+      break;
+    case 'POST':
+      res = await client.post(path, body ?? {});
+      break;
+    case 'PATCH':
+      res = await client.patch(path, body ?? {});
+      break;
+    case 'DELETE':
+      res = await client.delete(path);
+      break;
+  }
 
   if (!res.ok) {
     const errText = await res.text();

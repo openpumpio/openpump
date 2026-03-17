@@ -5,6 +5,10 @@ import { Trading } from './resources/trading.js';
 import { Jobs } from './resources/jobs.js';
 import { CreatorFees } from './resources/creator-fees.js';
 import { Bundles } from './resources/bundles.js';
+import { MarketMaking } from './resources/market-making.js';
+import { Snipe } from './resources/snipe.js';
+import { StopLoss } from './resources/stop-loss.js';
+import { Vanity } from './resources/vanity.js';
 
 export interface OpenPumpConfig {
   /** API key (op_sk_live_...) */
@@ -35,6 +39,18 @@ export interface OpenPumpConfig {
  *
  * // Poll a bundle launch job
  * const job = await op.jobs.poll('job-id', { timeoutMs: 60_000 });
+ *
+ * // Market making
+ * const session = await op.marketMaking.startSession({ ... });
+ *
+ * // Snipe monitors
+ * const monitor = await op.snipe.startMonitor({ ... });
+ *
+ * // Stop-loss
+ * const sl = await op.stopLoss.set({ ... });
+ *
+ * // Vanity addresses
+ * const estimate = await op.vanity.estimateCost({ pattern: 'PUMP' });
  * ```
  */
 export class OpenPump {
@@ -44,6 +60,10 @@ export class OpenPump {
   readonly jobs: Jobs;
   readonly creatorFees: CreatorFees;
   readonly bundles: Bundles;
+  readonly marketMaking: MarketMaking;
+  readonly snipe: Snipe;
+  readonly stopLoss: StopLoss;
+  readonly vanity: Vanity;
 
   private readonly _http: HttpClient;
 
@@ -64,5 +84,9 @@ export class OpenPump {
     this.jobs = new Jobs(this._http);
     this.creatorFees = new CreatorFees(this._http);
     this.bundles = new Bundles(this._http);
+    this.marketMaking = new MarketMaking(this._http);
+    this.snipe = new Snipe(this._http);
+    this.stopLoss = new StopLoss(this._http);
+    this.vanity = new Vanity(this._http);
   }
 }

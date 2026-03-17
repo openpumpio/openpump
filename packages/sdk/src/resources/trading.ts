@@ -57,6 +57,28 @@ export interface SellResult {
   disclaimer: string;
 }
 
+export interface BundleBuyEntry {
+  walletId: string;
+  solAmount: string;
+}
+
+export interface BundleBuyOptions {
+  walletBuys: BundleBuyEntry[];
+  tipWalletId?: string;
+  slippageBps?: number;
+  priorityLevel?: PriorityLevel;
+}
+
+export interface BundleBuyResult {
+  bundleResults: Array<{
+    bundleId: string;
+    status: 'Landed' | 'Failed' | 'Timeout';
+    signatures?: string[];
+    walletsIncluded: string[];
+  }>;
+  warnings: Array<{ walletId: string; reason: string }>;
+}
+
 export interface BundleSellEntry {
   walletId: string;
   tokenAmount: string;
@@ -125,5 +147,24 @@ export class Trading {
   /** Multi-wallet sell packed into Jito bundles. */
   async bundleSell(mint: string, options: BundleSellOptions): Promise<BundleSellResult> {
     return this._http.post<BundleSellResult>(`/api/tokens/${mint}/bundle-sell`, options);
+  }
+
+  /**
+   * Multi-wallet buy packed into Jito bundles.
+   *
+   * @example
+   * ```ts
+   * const result = await op.trading.bundleBuy('So11...abc', {
+   *   walletBuys: [
+   *     { walletId: 'wallet-1', solAmount: '50000000' },
+   *     { walletId: 'wallet-2', solAmount: '100000000' },
+   *   ],
+   *   slippageBps: 500,
+   * });
+   * console.log(result.bundleResults);
+   * ```
+   */
+  async bundleBuy(mint: string, options: BundleBuyOptions): Promise<BundleBuyResult> {
+    return this._http.post<BundleBuyResult>(`/api/tokens/${mint}/bundle-buy`, options);
   }
 }

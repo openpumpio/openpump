@@ -58,6 +58,36 @@ export interface TransactionListResult {
   offset: number;
 }
 
+export interface BatchCreateOptions {
+  count: number;
+  labelPrefix?: string;
+}
+
+export interface BatchCreateResult {
+  wallets: WalletInfo[];
+  created: number;
+  failed: number;
+}
+
+export interface AggregateBalance {
+  totalSol: string;
+  totalLamports: string;
+  walletCount: number;
+}
+
+export interface ImportWalletOptions {
+  privateKey: string;
+  label?: string;
+}
+
+export interface ExportPrivateKeyOptions {
+  password: string;
+}
+
+export interface ExportPrivateKeyResult {
+  privateKey: string;
+}
+
 export class Wallets {
   constructor(private readonly _http: HttpClient) {}
 
@@ -117,5 +147,71 @@ export class Wallets {
     if (options?.limit !== undefined) query['limit'] = String(options.limit);
     if (options?.offset !== undefined) query['offset'] = String(options.offset);
     return this._http.get<TransactionListResult>(`/api/wallets/${walletId}/transactions`, query);
+  }
+
+  /**
+   * Create multiple wallets in a single call (2--50).
+   *
+   * @example
+   * ```ts
+   * const result = await op.wallets.batchCreate({
+   *   count: 5,
+   *   labelPrefix: 'sniper',
+   * });
+   * console.log(result.wallets.length);
+   * ```
+   */
+  async batchCreate(options: BatchCreateOptions): Promise<BatchCreateResult> {
+    return this._http.post<BatchCreateResult>('/api/wallets/batch', options);
+  }
+
+  /**
+   * Get the total SOL balance across all wallets.
+   *
+   * @example
+   * ```ts
+   * const agg = await op.wallets.getAggregateBalance();
+   * console.log(`Total: ${agg.totalSol} SOL across ${agg.walletCount} wallets`);
+   * ```
+   */
+  async getAggregateBalance(): Promise<AggregateBalance> {
+    return this._http.get<AggregateBalance>('/api/wallets/aggregate-balance');
+  }
+
+  /**
+   * Import an existing Solana wallet by providing its private key.
+   *
+   * @example
+   * ```ts
+   * const wallet = await op.wallets.importWallet({
+   *   privateKey: 'base58-encoded-key...',
+   *   label: 'my-phantom-wallet',
+   * });
+   * console.log(wallet.publicKey);
+   * ```
+   */
+  async importWallet(options: ImportWalletOptions): Promise<WalletInfo> {
+    return this._http.post<WalletInfo>('/api/wallets/import', options);
+  }
+
+  /**
+   * Export a wallet's private key. Requires password re-authentication.
+   *
+   * @example
+   * ```ts
+   * const result = await op.wallets.exportPrivateKey('wallet-id', {
+   *   password: 'your-password',
+   * });
+   * console.log(result.privateKey);
+   * ```
+   */
+  async exportPrivateKey(
+    walletId: string,
+    options: ExportPrivateKeyOptions,
+  ): Promise<ExportPrivateKeyResult> {
+    return this._http.post<ExportPrivateKeyResult>(
+      `/api/wallets/${walletId}/export-private-key`,
+      options,
+    );
   }
 }

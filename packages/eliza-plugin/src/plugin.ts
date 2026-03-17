@@ -3,7 +3,7 @@
  *
  * Exports a valid ElizaOS Plugin object with:
  * - init() that validates the API key and pre-creates the client
- * - 8 actions for trading, token management, and wallet queries
+ * - 25 actions for trading, wallet management, market making, sniping, stop-losses, and vanity addresses
  * - 1 provider for portfolio context injection
  */
 import type { Plugin, IAgentRuntime } from '@elizaos/core';
@@ -15,6 +15,22 @@ import { listWalletsAction } from './actions/list-wallets.js';
 import { getBalanceAction } from './actions/get-balance.js';
 import { bundleBuyAction } from './actions/bundle-buy.js';
 import { sellAllAction } from './actions/sell-all.js';
+import { transferSolAction } from './actions/transfer-sol.js';
+import { transferTokenAction } from './actions/transfer-token.js';
+import { batchCreateWalletsAction } from './actions/batch-create-wallets.js';
+import { getAggregateBalanceAction } from './actions/get-aggregate-balance.js';
+import { mmStartSessionAction } from './actions/mm-start-session.js';
+import { mmStopSessionAction } from './actions/mm-stop-session.js';
+import { mmSessionStatusAction } from './actions/mm-session-status.js';
+import { mmListSessionsAction } from './actions/mm-list-sessions.js';
+import { snipeStartAction } from './actions/snipe-start.js';
+import { snipeStopAction } from './actions/snipe-stop.js';
+import { snipeListAction } from './actions/snipe-list.js';
+import { stopLossSetAction } from './actions/stop-loss-set.js';
+import { stopLossRemoveAction } from './actions/stop-loss-remove.js';
+import { stopLossListAction } from './actions/stop-loss-list.js';
+import { vanityOrderAction } from './actions/vanity-order.js';
+import { vanityListAction } from './actions/vanity-list.js';
 import { walletProvider } from './providers/wallet-provider.js';
 import { createApiClient, type ApiClient } from './lib/api-client.js';
 
@@ -55,8 +71,8 @@ export function clearClientCache(agentId?: string): void {
 export const openpumpPlugin: Plugin = {
   name: 'openpump',
   description:
-    'Buy, sell, and launch PumpFun tokens via the OpenPump managed wallet API. ' +
-    'Provides trading actions and portfolio context for conversational AI agents.',
+    'Full-featured PumpFun trading plugin for ElizaOS agents via the OpenPump managed wallet API. ' +
+    'Supports trading, wallet management, market making, token sniping, stop-losses, and vanity addresses.',
 
   init: (_config: Record<string, string>, runtime: IAgentRuntime): Promise<void> => {
     const apiKey = runtime.getSetting('OPENPUMP_API_KEY');
@@ -83,6 +99,22 @@ export const openpumpPlugin: Plugin = {
     getBalanceAction,
     bundleBuyAction,
     sellAllAction,
+    transferSolAction,
+    transferTokenAction,
+    batchCreateWalletsAction,
+    getAggregateBalanceAction,
+    mmStartSessionAction,
+    mmStopSessionAction,
+    mmSessionStatusAction,
+    mmListSessionsAction,
+    snipeStartAction,
+    snipeStopAction,
+    snipeListAction,
+    stopLossSetAction,
+    stopLossRemoveAction,
+    stopLossListAction,
+    vanityOrderAction,
+    vanityListAction,
   ],
 
   providers: [walletProvider],
